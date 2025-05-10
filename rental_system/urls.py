@@ -15,7 +15,7 @@ router.register(r'reviews', ReviewViewSet)
 
 urlpatterns = [
     path('', home, name='home'),
-    path('admin/', admin.site.urls),  # Страница администратора
-    path('api/', include(router.urls)),  # API с маршрутизацией для listings, bookings, reviews
-    path('api/users/', UserListView.as_view(), name='user-list'),  # Пользовательский API
+    path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+    path('api/users/', UserListView.as_view(), name='user-list'),
 ]
