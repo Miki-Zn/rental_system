@@ -13,7 +13,7 @@ class Listing(models.Model):
     description = models.TextField()
     location = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    rooms = models.IntegerField()
+    number_of_rooms = models.IntegerField()
     property_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

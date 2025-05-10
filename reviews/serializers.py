@@ -8,6 +8,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'created_at']
 
     def validate(self, data):
+        if 'booking' not in data:
+            raise serializers.ValidationError("Booking is required")
         if not data['booking'].is_confirmed:
-            raise serializers.ValidationError("You can only leave a review for confirmed bookings.")
+            raise serializers.ValidationError("Booking is not confirmed.")
         return data
