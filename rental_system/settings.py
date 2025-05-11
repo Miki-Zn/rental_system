@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'listings',
     'bookings',
     'reviews',
+    'searches',
 ]
 
 
