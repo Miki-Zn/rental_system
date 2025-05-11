@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from rental_system.views import home
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from listings.views import ListingViewSet
 from bookings.views import BookingViewSet
@@ -19,4 +20,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/users/', UserListView.as_view(), name='user-list'),
     path('reviews/', include('reviews.urls')),
+    path('api/', include('listings.urls')),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
 ]
+

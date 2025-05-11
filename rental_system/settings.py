@@ -45,15 +45,22 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
 
-
     'rest_framework',
-
+    'rest_framework.authtoken',
 
     'users',
     'listings',
     'bookings',
     'reviews',
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
