@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: rental_system_db
+      MYSQL_USER: ich1
+      MYSQL_PASSWORD: ich1_password_ilovedbs
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  web:
+    build: .
+    command: gunicorn rental_system.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_NAME: rental_system_db
+      DB_USER: ich1
+      DB_PASSWORD: ich1_password_ilovedbs
+      DB_PORT: 3306
+
+volumes:
+  mysql_data:
