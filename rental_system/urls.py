@@ -17,13 +17,22 @@ router.register(r'reviews', ReviewViewSet)
 urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
-    path('api/users/', UserListView.as_view(), name='user-list'),
-    path('reviews/', include('reviews.urls')),
-    path('api/', include('listings.urls')),
+
+
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+
+    path('api/users/', UserListView.as_view(), name='user-list'),
+    path('auth/', include('users.urls')),
+
+
+    path('api/', include(router.urls)),
     path('api/', include('searches.urls')),
 
-]
 
+    path('reviews/', include('reviews.urls')),
+
+
+    path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
+]

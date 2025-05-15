@@ -1,14 +1,18 @@
 from rest_framework import viewsets, permissions, filters as drf_filters
 from django_filters import rest_framework as django_filters
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Listing
 from .serializers import ListingSerializer
+from .forms import ListingForm
+
+
 
 class ListingFilter(django_filters.FilterSet):
     min_price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
     max_price = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
     location = django_filters.CharFilter(field_name='location', lookup_expr='icontains')
-    min_rooms = django_filters.NumberFilter(field_name='rooms', lookup_expr='gte')
-    max_rooms = django_filters.NumberFilter(field_name='rooms', lookup_expr='lte')
+    min_rooms = django_filters.NumberFilter(field_name='number_of_rooms', lookup_expr='gte')
+    max_rooms = django_filters.NumberFilter(field_name='number_of_rooms', lookup_expr='lte')
     property_type = django_filters.ChoiceFilter(choices=Listing.TYPE_CHOICES)
 
     class Meta:
@@ -26,3 +30,41 @@ class ListingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+
+def listing_list(request):
+    listings = Listing.objects.all()
+    return render(request, 'listings/list.html', {'listings': listings})
+
+def listing_create(request):
+    if request.method == 'POST':
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            listing = form.save(commit=False)
+            listing.owner = request.user
+            listing.save()
+            return redirect('listings:list')
+    else:
+        form = ListingForm()
+
+    return render(request, 'listings/create.html', {'form': form})
+
+
+def listing_update(request, pk):
+    listing = get_object_or_404(Listing, pk=pk)
+    if request.method == 'POST':
+        form = ListingForm(request.POST, instance=listing)
+        if form.is_valid():
+            form.save()
+            return redirect('listings:listing-list')
+    else:
+        form = ListingForm(instance=listing)
+    return render(request, 'listings/update.html', {'form': form})
+
+def listing_delete(request, pk):
+    listing = get_object_or_404(Listing, pk=pk)
+    if request.method == 'POST':
+        listing.delete()
+        return redirect('listings:listing-list')
+    return render(request, 'listings/delete.html', {'listing': listing})

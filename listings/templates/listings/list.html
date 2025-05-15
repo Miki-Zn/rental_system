@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h2>Список объявлений</h2>
+    <p><a href="{% url 'listings:listing-create' %}">+ Создать новое объявление</a></p>
+
+    {% if listings %}
+      <ul>
+        {% for listing in listings %}
+          <li>
+            <strong>{{ listing.title }}</strong><br>
+            Цена: {{ listing.price }} ₽<br>
+            Локация: {{ listing.location }}<br>
+            <a href="{% url 'listings:listing-update' listing.pk %}">Изменить</a> |
+            <a href="{% url 'listings:listing-delete' listing.pk %}">Удалить</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Объявлений пока нет.</p>
+    {% endif %}
+  </div>
+{% endblock %}

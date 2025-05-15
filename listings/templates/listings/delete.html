@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить объявление{% endblock %}
+
+{% block content %}
+  <h2>Удалить объявление</h2>
+  <p>Вы уверены, что хотите удалить <strong>{{ listing.title }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'listings:listing-list' %}" class="btn btn-secondary">Отмена</a>
+  </form>
+{% endblock %}
