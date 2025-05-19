@@ -3,11 +3,15 @@ from django.urls import path, include
 from rest_framework import routers
 from rental_system.views import home
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
 
 from listings.views import ListingViewSet
 from bookings.views import BookingViewSet
 from reviews.views import ReviewViewSet
 from users.views import UserListView
+
+
 
 router = routers.DefaultRouter()
 router.register(r'listings', ListingViewSet)
@@ -36,3 +40,4 @@ urlpatterns = [
 
     path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
 ]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

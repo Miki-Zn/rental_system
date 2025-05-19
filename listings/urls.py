@@ -24,4 +24,6 @@ urlpatterns = [
     path('create/', listing_create, name='listing-create'),
     path('update/<int:pk>/', listing_update, name='listing-update'),
     path('delete/<int:pk>/', listing_delete, name='listing-delete'),
+    path('<int:pk>/', views.listing_detail, name='listing-detail'),
+
 ]

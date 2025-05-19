@@ -64,7 +64,16 @@ def listing_update(request, pk):
 
 def listing_delete(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
+    if listing.owner != request.user:
+        return HttpResponseForbidden("You are not the owner of this listing.")
+
     if request.method == 'POST':
         listing.delete()
         return redirect('listings:listing-list')
     return render(request, 'listings/delete.html', {'listing': listing})
+def listing_detail(request, pk):
+    listing = get_object_or_404(Listing, pk=pk)
+    return render(request, 'listings/detail.html', {'listing': listing})
+
+def perform_create(self, serializer):
+    serializer.save(owner=self.request.user)
