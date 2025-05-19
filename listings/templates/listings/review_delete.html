@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить отзыв{% endblock %}
+
+{% block content %}
+  <h2>Удалить отзыв</h2>
+  <p>Вы уверены, что хотите удалить ваш отзыв к объявлению <strong>{{ listing.title }}</strong>?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'listings:listing-detail' listing.pk %}" class="btn btn-secondary">Отмена</a>
+  </form>
+{% endblock %}

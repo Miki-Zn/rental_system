@@ -1,20 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import (
-    ListingViewSet,
-    listing_list,
-    listing_create,
-    listing_update,
-    listing_delete
-)
 
 app_name = 'listings'
 
 router = DefaultRouter()
-router.register(r'api/listings', ListingViewSet, basename='listing')
+router.register(r'api/listings', views.ListingViewSet, basename='listing')
 
 urlpatterns = [
+
     path('', include(router.urls)),
 
 
@@ -24,4 +18,7 @@ urlpatterns = [
     path('delete/<int:pk>/', views.listing_delete, name='listing_delete'),
     path('<int:pk>/', views.listing_detail, name='listing_detail'),
 
+
+    path('<int:listing_pk>/reviews/<int:review_pk>/edit/', views.review_update, name='review_update'),
+    path('<int:listing_pk>/reviews/<int:review_pk>/delete/', views.review_delete, name='review_delete'),
 ]

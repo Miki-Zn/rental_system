@@ -52,7 +52,7 @@ def listing_create(request):
             listing = form.save(commit=False)
             listing.owner = request.user
             listing.save()
-            return redirect('listings:listing-list')
+            return redirect('listings:listing_list')
     else:
         form = ListingForm()
     return render(request, 'listings/create.html', {'form': form})
@@ -68,10 +68,10 @@ def listing_update(request, pk):
         form = ListingForm(request.POST, request.FILES, instance=listing)
         if form.is_valid():
             form.save()
-            return redirect('listings:listing-list')
+            return redirect('listings:listing_detail', pk=pk)
     else:
         form = ListingForm(instance=listing)
-    return render(request, 'listings/update.html', {'form': form})
+    return render(request, 'listings/update.html', {'form': form, 'listing': listing})
 
 
 @login_required
@@ -82,7 +82,7 @@ def listing_delete(request, pk):
 
     if request.method == 'POST':
         listing.delete()
-        return redirect('listings:listing-list')
+        return redirect('listings:listing_list')
     return render(request, 'listings/delete.html', {'listing': listing})
 
 
@@ -100,7 +100,7 @@ def listing_detail(request, pk):
             review.listing = listing
             review.user = request.user
             review.save()
-            return redirect('listings:listing-detail', pk=pk)
+            return redirect('listings:listing_detail', pk=pk)
     else:
         form = ReviewForm()
 
@@ -108,4 +108,45 @@ def listing_detail(request, pk):
         'listing': listing,
         'reviews': reviews,
         'form': form,
+    })
+
+
+@login_required
+def review_update(request, listing_pk, review_pk):
+    listing = get_object_or_404(Listing, pk=listing_pk)
+    review = get_object_or_404(Review, pk=review_pk, listing=listing)
+
+    if review.user != request.user:
+        return HttpResponseForbidden("Вы не можете редактировать этот отзыв.")
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+            return redirect('listings:listing_detail', pk=listing_pk)
+    else:
+        form = ReviewForm(instance=review)
+
+    return render(request, 'listings/review_update.html', {
+        'form': form,
+        'listing': listing,
+        'review': review,
+    })
+
+
+@login_required
+def review_delete(request, listing_pk, review_pk):
+    listing = get_object_or_404(Listing, pk=listing_pk)
+    review = get_object_or_404(Review, pk=review_pk, listing=listing)
+
+    if review.user != request.user:
+        return HttpResponseForbidden("Вы не можете удалить этот отзыв.")
+
+    if request.method == 'POST':
+        review.delete()
+        return redirect('listings:listing_detail', pk=listing_pk)
+
+    return render(request, 'listings/review_delete.html', {
+        'review': review,
+        'listing': listing,
     })

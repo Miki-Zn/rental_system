@@ -1,9 +1,7 @@
 from django.db import models
-from users.models import User
-from django.contrib.auth import get_user_model
 from django.conf import settings
 
-User = get_user_model()
+User = settings.AUTH_USER_MODEL
 
 class Listing(models.Model):
     TYPE_CHOICES = (
@@ -26,9 +24,15 @@ class Listing(models.Model):
     def __str__(self):
         return self.title
 
+    def average_rating(self):
+        from django.db.models import Avg
+        result = self.listing_reviews.aggregate(avg=Avg('rating'))
+        return result['avg'] or 0
+
+
 class Review(models.Model):
-    listing = models.ForeignKey('Listing', related_name='listing_reviews', on_delete=models.CASCADE)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    listing = models.ForeignKey(Listing, related_name='listing_reviews', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

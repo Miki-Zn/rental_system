@@ -27,16 +27,16 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # Users
+    # Users API
     path('api/users/', UserListView.as_view(), name='user-list'),
-    path('auth/', include('users.urls', namespace='users')),
 
+    # Users
+    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(template_name='registration/logged_out.html'), name='logout'),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/signup/', include('users.urls', namespace='users')),
 
-    #  Login
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
-
-    # API
+    # DRF API
     path('api/', include(router.urls)),
     path('api/', include('searches.urls')),
 
