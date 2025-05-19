@@ -37,18 +37,22 @@ def listing_list(request):
     listings = Listing.objects.all()
     return render(request, 'listings/list.html', {'listings': listings})
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+
+@login_required
 def listing_create(request):
     if request.method == 'POST':
-        form = ListingForm(request.POST)
+        form = ListingForm(request.POST, request.FILES)
         if form.is_valid():
             listing = form.save(commit=False)
-            listing.owner = request.user
+            listing.owner = request.user  # request.user точно будет User
             listing.save()
-            return redirect('listings:list')
+            return redirect('listings:listing-list')
     else:
         form = ListingForm()
-
     return render(request, 'listings/create.html', {'form': form})
+
 
 
 def listing_update(request, pk):

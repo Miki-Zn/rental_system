@@ -20,6 +20,7 @@ class Listing(models.Model):
     property_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='listing_images/', blank=True, null=True)
 
     def __str__(self):
         return self.title
