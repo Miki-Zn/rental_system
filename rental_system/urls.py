@@ -29,7 +29,8 @@ urlpatterns = [
 
     # Users
     path('api/users/', UserListView.as_view(), name='user-list'),
-    path('auth/', include('users.urls')),
+    path('auth/', include('users.urls', namespace='users')),
+
 
     #  Login
     path('accounts/login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),

@@ -32,6 +32,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
 
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -42,4 +45,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-

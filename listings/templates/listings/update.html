@@ -3,11 +3,13 @@
 {% block title %}Редактировать объявление{% endblock %}
 
 {% block content %}
-  <h2>Редактирование объявления</h2>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Обновить</button>
-    <a href="{% url 'listings:listing-list' %}" class="btn btn-secondary">Назад</a>
-  </form>
+  <div class="container">
+    <h2>Редактирование объявления</h2>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Обновить</button>
+      <a href="{% url 'listings:listing_list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+  </div>
 {% endblock %}

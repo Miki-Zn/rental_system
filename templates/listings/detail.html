@@ -1,0 +1,22 @@
+<h2>Reviews</h2>
+{% for review in reviews %}
+    <div>
+        <strong>{{ review.user.username }}</strong>
+        <p>Rating: {{ review.rating }}</p>
+        <p>{{ review.comment }}</p>
+        <p><em>{{ review.created_at }}</em></p>
+    </div>
+{% empty %}
+    <p>No reviews yet.</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+    <h3>Leave a review</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit Review</button>
+    </form>
+{% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to leave a review.</p>
+{% endif %}
