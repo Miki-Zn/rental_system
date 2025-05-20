@@ -1,49 +1,48 @@
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
-from rental_system.views import home
+from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from rental_system.views import home
 from listings.views import ListingViewSet
 from bookings.views import BookingViewSet
 from reviews.views import ReviewViewSet
 from users.views import UserListView
 
+# DRF Router
 router = routers.DefaultRouter()
 router.register(r'listings', ListingViewSet)
 router.register(r'bookings', BookingViewSet)
 router.register(r'reviews', ReviewViewSet)
 
 urlpatterns = [
-    # Admin, Home
+
     path('', home, name='home'),
     path('admin/', admin.site.urls),
 
-    # JWT
+
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # Users API
-    path('api/users/', UserListView.as_view(), name='user-list'),
 
-    # Users
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(template_name='registration/logged_out.html'), name='logout'),
+    path('api/users/list/', UserListView.as_view(), name='user-list'),
+    path('api/users/', include('users.urls')),  # например, регистрация
     path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/signup/', include('users.urls', namespace='users')),
+    path('accounts/signup/', include(('users.urls', 'users'), namespace='users')),
 
-    # DRF API
+
     path('api/', include(router.urls)),
     path('api/', include('searches.urls')),
 
-    # HTML
+
     path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
     path('reviews/', include('reviews.urls')),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,6 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from . import views  # импортируем свои views
+from . import views
+from .serializers import UserSerializer
 
 app_name = 'users'
 urlpatterns = [

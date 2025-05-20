@@ -15,6 +15,6 @@ class Review(models.Model):
         return f"Review {self.id} - {self.listing.title}"
 
     def save(self, *args, **kwargs):
-        if not self.booking.is_confirmed:
+        if self.booking and not self.booking.is_confirmed:
             raise ValueError("Review can only be left for confirmed bookings.")
         super().save(*args, **kwargs)

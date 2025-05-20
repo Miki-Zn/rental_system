@@ -3,6 +3,8 @@ from django_filters import rest_framework as django_filters
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from listings.serializers import ListingSerializer
+from users.permissions import IsOwnerOrReadOnly
 
 from .models import Listing, Review
 from .serializers import ListingSerializer
