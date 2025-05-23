@@ -29,12 +29,14 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     path('api/users/list/', UserListView.as_view(), name='user-list'),
-    path('api/users/', include('users.urls')),  # namespace уже внутри users.urls
+    path('api/users/', include(('users.urls', 'users'), namespace='users-api')),
 
-    path('accounts/', include('django.contrib.auth.urls')),  # только одно подключение
+
+    path('accounts/', include('django.contrib.auth.urls')),
 
     path('api/', include(router.urls)),
     path('api/', include('searches.urls')),
+    path('api/', include('bookings.urls')),
 
     path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
     path('reviews/', include('reviews.urls')),
