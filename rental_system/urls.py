@@ -30,6 +30,8 @@ urlpatterns = [
 
     path('api/users/list/', UserListView.as_view(), name='user-list'),
     path('api/users/', include(('users.urls', 'users'), namespace='users-api')),
+    path('api/analytics/', include('analytics.urls')),
+
 
 
     path('accounts/', include('django.contrib.auth.urls')),

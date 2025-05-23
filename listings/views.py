@@ -1,10 +1,14 @@
 from rest_framework import viewsets, permissions, filters as drf_filters
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django_filters import rest_framework as django_filters
+from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from analytics.models import ViewHistory
 
 from listings.serializers import ListingSerializer
 from users.permissions import IsOwnerOrAdminOrReadOnly
@@ -41,6 +45,14 @@ class ListingViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def popular(self, request):
+        popular_listings = Listing.objects.annotate(
+            views_count=Count('viewhistory')
+        ).order_by('-views_count')[:10]
+        serializer = self.get_serializer(popular_listings, many=True)
+        return Response(serializer.data)
 
 
 def listing_list(request):
@@ -96,6 +108,11 @@ def listing_detail(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
     reviews = Review.objects.filter(listing=listing).order_by('-created_at')
 
+    ViewHistory.objects.create(
+        user=request.user if request.user.is_authenticated else None,
+        listing=listing
+    )
+
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return HttpResponseForbidden("You must be logged in to leave a review.")
@@ -104,7 +121,7 @@ def listing_detail(request, pk):
         if form.is_valid():
             review = form.save(commit=False)
             review.listing = listing
-            review.author = request.user
+            review.user = request.user
             review.save()
             return redirect('listings:listing_detail', pk=pk)
     else:
@@ -123,7 +140,7 @@ def review_update(request, listing_pk, review_pk):
     review = get_object_or_404(Review, pk=review_pk, listing=listing)
     user = request.user
 
-    if review.author != user and user.role != 'admin':
+    if review.user != user and user.role != 'admin':
         return HttpResponseForbidden("You do not have permission to edit this review.")
 
     if request.method == 'POST':
@@ -147,7 +164,7 @@ def review_delete(request, listing_pk, review_pk):
     review = get_object_or_404(Review, pk=review_pk, listing=listing)
     user = request.user
 
-    if review.author != user and user.role != 'admin':
+    if review.user != user and user.role != 'admin':
         return HttpResponseForbidden("You do not have permission to delete this review.")
 
     if request.method == 'POST':
