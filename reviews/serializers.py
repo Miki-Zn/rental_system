@@ -3,6 +3,7 @@ from .models import Review
 
 class ReviewSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
+    listing = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Review

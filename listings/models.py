@@ -24,8 +24,10 @@ class Listing(models.Model):
         return self.title
 
     def average_rating(self):
-        result = self.listing_reviews.aggregate(avg=Avg('rating'))
-        return result['avg'] or 0
+        reviews = self.reviews.all()
+        if reviews.exists():
+            return round(sum([r.rating for r in reviews]) / reviews.count(), 1)
+        return None
 
 
 class Review(models.Model):

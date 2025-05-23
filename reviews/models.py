@@ -5,7 +5,7 @@ from bookings.models import Booking
 
 class Review(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name='reviews')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews', null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='written_reviews', null=True)
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='review', null=True, default=None)
     rating = models.IntegerField(choices=[(i, f'{i} Star') for i in range(1, 6)])
     comment = models.TextField(blank=True)

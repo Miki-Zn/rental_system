@@ -1,34 +1,25 @@
-from rest_framework import viewsets, permissions, status, serializers
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from .models import Review
 from .serializers import ReviewSerializer
-from django.contrib.auth.models import User
 from users.permissions import IsOwnerOrAdminOrReadOnly
 
 
-class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'password')
-
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email'),
-            password=validated_data['password']
-        )
-        return user
-
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
+    queryset = Review.objects.all().select_related('user', 'listing', 'booking')
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly]
 
+    def get_queryset(self):
+        queryset = self.queryset
+        listing_id = self.request.query_params.get('listing')
+        if listing_id:
+            queryset = queryset.filter(listing__id=listing_id)
+        return queryset.order_by('-created_at')
+
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        booking = serializer.validated_data.get('booking')
+        serializer.save(user=self.request.user, listing=booking.listing)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
