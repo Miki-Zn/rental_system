@@ -3,7 +3,16 @@
   <h2>Register</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.username.label_tag }} {{ form.username }}<br>
+    {{ form.email.label_tag }} {{ form.email }}<br>
+    {{ form.password1.label_tag }} {{ form.password1 }}<br>
+    {{ form.password2.label_tag }} {{ form.password2 }}<br>
+    {% if user.is_authenticated and user.role == 'admin' %}
+      {{ form.role.label_tag }} {{ form.role }}<br>
+    {% else %}
+      <input type="hidden" name="role" value="user">
+    {% endif %}
+
     <button type="submit">Register</button>
   </form>
 {% endblock %}

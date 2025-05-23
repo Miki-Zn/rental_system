@@ -3,11 +3,13 @@ from django_filters import rest_framework as django_filters
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
 from listings.serializers import ListingSerializer
-from users.permissions import IsOwnerOrReadOnly
+from users.permissions import IsOwnerOrAdminOrReadOnly
 
 from .models import Listing, Review
-from .serializers import ListingSerializer
 from .forms import ListingForm, ReviewForm
 
 
@@ -27,7 +29,7 @@ class ListingFilter(django_filters.FilterSet):
 class ListingViewSet(viewsets.ModelViewSet):
     queryset = Listing.objects.all()
     serializer_class = ListingSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly]
     filter_backends = (
         django_filters.DjangoFilterBackend,
         drf_filters.SearchFilter,
@@ -63,8 +65,9 @@ def listing_create(request):
 @login_required
 def listing_update(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
-    if listing.owner != request.user:
-        return HttpResponseForbidden("You are not the owner of this listing.")
+    user = request.user
+    if listing.owner != user and user.role != 'admin':
+        return HttpResponseForbidden("You are not allowed to edit this listing.")
 
     if request.method == 'POST':
         form = ListingForm(request.POST, request.FILES, instance=listing)
@@ -79,8 +82,9 @@ def listing_update(request, pk):
 @login_required
 def listing_delete(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
-    if listing.owner != request.user:
-        return HttpResponseForbidden("You are not the owner of this listing.")
+    user = request.user
+    if listing.owner != user and user.role != 'admin':
+        return HttpResponseForbidden("You are not allowed to delete this listing.")
 
     if request.method == 'POST':
         listing.delete()
@@ -100,7 +104,7 @@ def listing_detail(request, pk):
         if form.is_valid():
             review = form.save(commit=False)
             review.listing = listing
-            review.user = request.user
+            review.author = request.user
             review.save()
             return redirect('listings:listing_detail', pk=pk)
     else:
@@ -117,9 +121,10 @@ def listing_detail(request, pk):
 def review_update(request, listing_pk, review_pk):
     listing = get_object_or_404(Listing, pk=listing_pk)
     review = get_object_or_404(Review, pk=review_pk, listing=listing)
+    user = request.user
 
-    if review.user != request.user:
-        return HttpResponseForbidden("Вы не можете редактировать этот отзыв.")
+    if review.author != user and user.role != 'admin':
+        return HttpResponseForbidden("You do not have permission to edit this review.")
 
     if request.method == 'POST':
         form = ReviewForm(request.POST, instance=review)
@@ -140,9 +145,10 @@ def review_update(request, listing_pk, review_pk):
 def review_delete(request, listing_pk, review_pk):
     listing = get_object_or_404(Listing, pk=listing_pk)
     review = get_object_or_404(Review, pk=review_pk, listing=listing)
+    user = request.user
 
-    if review.user != request.user:
-        return HttpResponseForbidden("Вы не можете удалить этот отзыв.")
+    if review.author != user and user.role != 'admin':
+        return HttpResponseForbidden("You do not have permission to delete this review.")
 
     if request.method == 'POST':
         review.delete()
@@ -152,3 +158,15 @@ def review_delete(request, listing_pk, review_pk):
         'review': review,
         'listing': listing,
     })
+
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('listings:listing_list')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})

@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
-
-User = settings.AUTH_USER_MODEL
+from django.db.models import Avg
 
 class Listing(models.Model):
     TYPE_CHOICES = (
@@ -10,7 +9,7 @@ class Listing(models.Model):
         ('studio', 'Studio'),
     )
 
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='listings')
     title = models.CharField(max_length=255)
     description = models.TextField()
     location = models.CharField(max_length=255)
@@ -25,20 +24,19 @@ class Listing(models.Model):
         return self.title
 
     def average_rating(self):
-        from django.db.models import Avg
         result = self.listing_reviews.aggregate(avg=Avg('rating'))
         return result['avg'] or 0
 
 
 class Review(models.Model):
     listing = models.ForeignKey(Listing, related_name='listing_reviews', on_delete=models.CASCADE)
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     rating = models.PositiveSmallIntegerField()
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('listing', 'author')
+        unique_together = ('listing', 'user')
 
     def __str__(self):
-        return f'{self.rating} by {self.author} on {self.listing}'
+        return f'{self.rating} by {self.user} on {self.listing}'

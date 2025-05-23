@@ -1,16 +1,19 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, AbstractUser
 from django.db import models
 
-ROLE_CHOICES = (
-    ('admin', 'Admin'),
-    ('user', 'User'),
-)
+class User(AbstractUser):
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('user', 'User'),
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Email must be set')
         email = self.normalize_email(email)
+        extra_fields.setdefault('role', 'user')
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
@@ -29,7 +32,6 @@ class UserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
-
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)

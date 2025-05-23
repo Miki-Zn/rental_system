@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
 
 from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -24,25 +25,20 @@ urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
 
-
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-
     path('api/users/list/', UserListView.as_view(), name='user-list'),
-    path('api/users/', include('users.urls')),  # например, регистрация
-    path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/signup/', include(('users.urls', 'users'), namespace='users')),
+    path('api/users/', include('users.urls')),  # namespace уже внутри users.urls
 
+    path('accounts/', include('django.contrib.auth.urls')),  # только одно подключение
 
     path('api/', include(router.urls)),
     path('api/', include('searches.urls')),
 
-
     path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
     path('reviews/', include('reviews.urls')),
 ]
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

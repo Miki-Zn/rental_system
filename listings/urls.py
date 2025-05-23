@@ -8,7 +8,7 @@ router = DefaultRouter()
 router.register(r'api/listings', views.ListingViewSet, basename='listing')
 
 urlpatterns = [
-
+    # API endpoints
     path('', include(router.urls)),
 
 
