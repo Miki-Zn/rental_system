@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Booking
 
-
 class BookingSerializer(serializers.ModelSerializer):
     listing_title = serializers.ReadOnlyField(source='listing.title')
 
@@ -20,7 +19,9 @@ class BookingSerializer(serializers.ModelSerializer):
         listing = data.get('listing') or getattr(self.instance, 'listing', None)
 
         if start_date and end_date and start_date > end_date:
-            raise serializers.ValidationError("Start date must be before or equal to end date.")
+            raise serializers.ValidationError({
+                'non_field_errors': ['Start date must be before or equal to end date.']
+            })
 
         if listing and start_date and end_date:
             overlapping_bookings = Booking.objects.filter(
@@ -33,6 +34,8 @@ class BookingSerializer(serializers.ModelSerializer):
                 overlapping_bookings = overlapping_bookings.exclude(pk=self.instance.pk)
 
             if overlapping_bookings.exists():
-                raise serializers.ValidationError("This listing is already booked for the selected dates.")
+                raise serializers.ValidationError({
+                    'non_field_errors': ['This listing is already booked for the selected dates.']
+                })
 
         return data

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'djoser',
 
     'users',
     'listings',
@@ -66,7 +67,9 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

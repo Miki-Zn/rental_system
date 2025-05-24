@@ -3,6 +3,7 @@ from .models import SearchHistory
 from .serializers import SearchHistorySerializer
 from django.db.models import Count
 
+
 class SearchHistoryCreateView(generics.CreateAPIView):
     queryset = SearchHistory.objects.all()
     serializer_class = SearchHistorySerializer
@@ -17,3 +18,4 @@ class PopularSearchesListView(generics.ListAPIView):
 
     def get_queryset(self):
         return SearchHistory.objects.values('keyword').annotate(count=Count('keyword')).order_by('-count')[:10]
+

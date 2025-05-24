@@ -14,14 +14,12 @@ from bookings.views import BookingViewSet
 from reviews.views import ReviewViewSet
 from users.views import UserListView
 
-# DRF Router
 router = routers.DefaultRouter()
 router.register(r'listings', ListingViewSet)
 router.register(r'bookings', BookingViewSet)
 router.register(r'reviews', ReviewViewSet)
 
 urlpatterns = [
-
     path('', home, name='home'),
     path('admin/', admin.site.urls),
 
@@ -32,8 +30,6 @@ urlpatterns = [
     path('api/users/', include(('users.urls', 'users'), namespace='users-api')),
     path('api/analytics/', include('analytics.urls')),
 
-
-
     path('accounts/', include('django.contrib.auth.urls')),
 
     path('api/', include(router.urls)),
@@ -41,7 +37,10 @@ urlpatterns = [
     path('api/', include('bookings.urls')),
 
     path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
-    path('reviews/', include('reviews.urls')),
+    path('reviews/', include(('reviews.urls', 'reviews'), namespace='reviews')),
+
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
 ]
 
 if settings.DEBUG:

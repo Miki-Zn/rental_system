@@ -6,3 +6,7 @@ python-dotenv==1.1.0
 sqlparse==0.5.3
 gunicorn==21.2.0
 django-filter>=23.0
+pytest
+pytest-django
+factory_boy
+coverage
