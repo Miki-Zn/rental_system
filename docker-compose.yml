@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   db:
     image: mysql:8.0
@@ -14,18 +16,25 @@ services:
 
   web:
     build: .
-    command: gunicorn rental_system.wsgi:application --bind 0.0.0.0:8000
+    command: >
+      gunicorn rental_system.wsgi:application
+      --bind 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
-      DB_HOST: db
+      DEBUG: "1"
+      DJANGO_SETTINGS_MODULE: rental_system.settings
+      DB_ENGINE: django.db.backends.mysql
       DB_NAME: rental_system_db
       DB_USER: ich1
       DB_PASSWORD: ich1_password_ilovedbs
+      DB_HOST: db
       DB_PORT: 3306
 
 volumes:
