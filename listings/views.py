@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, filters as drf_filters
+from rest_framework import viewsets, permissions, filters as drf_filters, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters import rest_framework as django_filters
@@ -6,15 +6,15 @@ from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+
 from analytics.models import ViewHistory
-
+from listings.models import Listing, Review
 from listings.serializers import ListingSerializer
+from listings.forms import ListingForm, ReviewForm
 from users.permissions import IsOwnerOrAdminOrReadOnly
-
-from .models import Listing, Review
-from .forms import ListingForm, ReviewForm
 
 
 class ListingFilter(django_filters.FilterSet):
@@ -78,8 +78,8 @@ def listing_create(request):
 def listing_update(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
     user = request.user
-    if listing.owner != user and user.role != 'admin':
-        return HttpResponseForbidden("You are not allowed to edit this listing.")
+    if listing.owner != user and getattr(user, 'role', None) != 'admin':
+        raise PermissionDenied("You are not allowed to edit this listing.")
 
     if request.method == 'POST':
         form = ListingForm(request.POST, request.FILES, instance=listing)
@@ -95,8 +95,8 @@ def listing_update(request, pk):
 def listing_delete(request, pk):
     listing = get_object_or_404(Listing, pk=pk)
     user = request.user
-    if listing.owner != user and user.role != 'admin':
-        return HttpResponseForbidden("You are not allowed to delete this listing.")
+    if listing.owner != user and getattr(user, 'role', None) != 'admin':
+        raise PermissionDenied("You are not allowed to delete this listing.")
 
     if request.method == 'POST':
         listing.delete()
@@ -115,8 +115,7 @@ def listing_detail(request, pk):
 
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            return HttpResponseForbidden("You must be logged in to leave a review.")
-
+            raise PermissionDenied("You must be logged in to leave a review.")
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
@@ -140,8 +139,8 @@ def review_update(request, listing_pk, review_pk):
     review = get_object_or_404(Review, pk=review_pk, listing=listing)
     user = request.user
 
-    if review.user != user and user.role != 'admin':
-        return HttpResponseForbidden("You do not have permission to edit this review.")
+    if review.user != user and getattr(user, 'role', None) != 'admin':
+        raise PermissionDenied("You do not have permission to edit this review.")
 
     if request.method == 'POST':
         form = ReviewForm(request.POST, instance=review)
@@ -164,8 +163,8 @@ def review_delete(request, listing_pk, review_pk):
     review = get_object_or_404(Review, pk=review_pk, listing=listing)
     user = request.user
 
-    if review.user != user and user.role != 'admin':
-        return HttpResponseForbidden("You do not have permission to delete this review.")
+    if review.user != user and getattr(user, 'role', None) != 'admin':
+        raise PermissionDenied("You do not have permission to delete this review.")
 
     if request.method == 'POST':
         review.delete()
@@ -187,3 +186,14 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+
+class ListingSearchView(generics.ListAPIView):
+    serializer_class = ListingSerializer
+
+    def get_queryset(self):
+        queryset = Listing.objects.all()
+        query = self.request.query_params.get('q')
+        if query:
+            queryset = queryset.filter(title__icontains=query)
+        return queryset

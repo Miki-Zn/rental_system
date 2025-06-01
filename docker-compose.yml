@@ -1,41 +1,37 @@
-version: "3.9"
-
 services:
   db:
     image: mysql:8.0
     restart: always
-    environment:
-      MYSQL_DATABASE: rental_system_db
-      MYSQL_USER: ich1
-      MYSQL_PASSWORD: ich1_password_ilovedbs
-      MYSQL_ROOT_PASSWORD: rootpassword
+    env_file:
+      - .env
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
-    command: >
-      gunicorn rental_system.wsgi:application
-      --bind 0.0.0.0:8000
-    volumes:
-      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8000:8000"
-    depends_on:
-      - db
+    volumes:
+      - .:/app
     env_file:
       - .env
-    environment:
-      DEBUG: "1"
-      DJANGO_SETTINGS_MODULE: rental_system.settings
-      DB_ENGINE: django.db.backends.mysql
-      DB_NAME: rental_system_db
-      DB_USER: ich1
-      DB_PASSWORD: ich1_password_ilovedbs
-      DB_HOST: db
-      DB_PORT: 3306
+    command: ["./wait-for-it.sh", "db:3306", "--timeout=60", "--", "gunicorn", "rental_system.wsgi:application", "--bind", "0.0.0.0:8000"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
 
 volumes:
   mysql_data:

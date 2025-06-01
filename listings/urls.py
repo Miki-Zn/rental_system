@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
+from listings.views import ListingSearchView
 
 app_name = 'listings'
 
@@ -11,6 +12,7 @@ urlpatterns = [
     # API endpoints
     path('', include(router.urls)),
 
+    path('search/', ListingSearchView.as_view(), name='listing-search'),
 
     path('list/', views.listing_list, name='listing_list'),
     path('create/', views.listing_create, name='listing_create'),

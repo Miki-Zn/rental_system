@@ -35,6 +35,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/', include('searches.urls')),
     path('api/', include('bookings.urls')),
+    path('api/', include('listings.urls')),
 
     path('listings/', include(('listings.urls', 'listings'), namespace='listings')),
     path('reviews/', include(('reviews.urls', 'reviews'), namespace='reviews')),

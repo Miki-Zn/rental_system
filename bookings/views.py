@@ -3,10 +3,11 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Booking
 from .serializers import BookingSerializer
+from .permissions import IsBookingOwner, IsListingOwner
 
 
 class BookingViewSet(viewsets.ModelViewSet):
-    queryset = Booking.objects.all()
+    queryset = Booking.objects.none()  
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -16,25 +17,15 @@ class BookingViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsBookingOwner])
     def cancel_booking(self, request, pk=None):
         booking = self.get_object()
-        if booking.user != request.user:
-            return Response(
-                {"detail": "You cannot cancel someone else's booking."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         booking.delete()
         return Response({"detail": "Booking was successfully cancelled."}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsListingOwner])
     def confirm_booking(self, request, pk=None):
         booking = self.get_object()
-        if booking.listing.owner != request.user:
-            return Response(
-                {"detail": "You are not authorized to confirm this booking."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         if booking.is_confirmed:
             return Response({"detail": "Booking is already confirmed."}, status=status.HTTP_400_BAD_REQUEST)
 
